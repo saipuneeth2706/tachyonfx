@@ -22,6 +22,8 @@ const PORTFOLIO_URL: &str = "https://www.saipuneeth.me";
 const TWITTER_URL: &str = "https://x.com/rsaipuneeth";
 const LINK1: &str = "saipuneeth.me";
 const LINK2: &str = "@rsaipuneeth";
+const DOC_URL: &str = "https://junkdog.github.io/tachyonfx-ftl/";
+const GITHUB_URL: &str = "https://github.com/ratatui/tachyonfx";
 const BG_COLOR: Color = Color::Rgb(0x0B, 0x09, 0x09);
 
 fn main() -> io::Result<()> {
@@ -158,8 +160,8 @@ impl App {
         // Header / tagline
         frame.render_widget(
             Paragraph::new(Line::from(Span::styled(
-                "Animated effects library for building ratatui TUIs",
-                Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD),
+                "Skill files for tachyonfx, Effects and animation library for Ratatui applications",
+                Style::default().fg(Color::LightYellow).add_modifier(Modifier::BOLD),
             )))
             .alignment(Alignment::Center),
             Rect {
@@ -170,16 +172,13 @@ impl App {
             },
         );
 
-        // Description (two lines)
+        // Description (two lines: project URLs)
+        let link_style = Style::default()
+            .fg(Color::Rgb(0x76, 0x92, 0xFF))
+            .add_modifier(Modifier::UNDERLINED);
         let desc_text = vec![
-            Line::from(Span::styled(
-                "Power up your TUI with smooth transitions, wipes,",
-                Style::default().fg(Color::White),
-            )),
-            Line::from(Span::styled(
-                "glitches, and color shifts — one line at a time. Install the",
-                Style::default().fg(Color::White),
-            )),
+            Line::from(Span::styled(DOC_URL, link_style)),
+            Line::from(Span::styled(GITHUB_URL, link_style)),
         ];
         frame.render_widget(
             Paragraph::new(desc_text).alignment(Alignment::Center),
@@ -267,16 +266,37 @@ impl App {
         let mut regions = self.regions.borrow_mut();
         regions.clear();
 
-        let box_content_x = box_x + 1;
-        let copy_x = box_content_x + cmd_rendered - cmd_label.len() as u16;
+        // Entire command box (all 3 rows incl. borders) copies on click.
         regions.push(ClickableRegion {
             rect: Rect {
-                x: copy_x,
-                y: box_y + 1,
-                width: cmd_label.len() as u16,
-                height: 1,
+                x: box_x,
+                y: box_y,
+                width: box_width,
+                height: 3,
             },
             action: Action::CopyCommand,
+        });
+
+        // Description URLs (docs + github) are clickable.
+        let doc_x = inner.x + (inner.width.saturating_sub(DOC_URL.len() as u16)) / 2;
+        let github_x = inner.x + (inner.width.saturating_sub(GITHUB_URL.len() as u16)) / 2;
+        regions.push(ClickableRegion {
+            rect: Rect {
+                x: doc_x,
+                y: title_y,
+                width: DOC_URL.len() as u16,
+                height: 1,
+            },
+            action: Action::OpenUrl(DOC_URL.to_string()),
+        });
+        regions.push(ClickableRegion {
+            rect: Rect {
+                x: github_x,
+                y: title_y + 1,
+                width: GITHUB_URL.len() as u16,
+                height: 1,
+            },
+            action: Action::OpenUrl(GITHUB_URL.to_string()),
         });
 
         let total_links_len = LINK1.len() as u16 + 3 + LINK2.len() as u16;
